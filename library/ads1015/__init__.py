@@ -26,15 +26,15 @@ class ADS1015:
                     'active': 0,
                     'inactive_start': 1
                 })),
-                BitField('multiplexer',         0b0111000000000000, adapter=LookupAdaoter({
+                BitField('multiplexer',         0b0111000000000000, adapter=LookupAdapter({
                     'in0/in1': 0b000,   # Differential reading between in0 and in0, voltages must not be negative and must not exceed supply voltage
                     'in0/ref': 0b001,   # Differential reading between in0 and onboard reference connected to in3
                     'in1/ref': 0b010,   # Differential reading between in1 and ref
                     'in2/ref': 0b011,   # Differential reading between in2 and ref
                     'in0/gnd': 0b100,   # Single-ended reading between in0 and GND
                     'in1/gnd': 0b101,   # Single-ended reading between in1 and GND
-                    'in2/gnd', 0b110,   # Single-ended reading between in2 and GND
-                    'ref/gnd', 0b111    # Should always read 1.25v (or reference voltage)
+                    'in2/gnd': 0b110,   # Single-ended reading between in2 and GND
+                    'ref/gnd': 0b111    # Should always read 1.25v (or reference voltage)
                 })),
                 BitField('programmable_gain',   0b0000111000000000, adapter=LookupAdapter({
                     6.144: 0b000,
@@ -44,7 +44,7 @@ class ADS1015:
                     0.512: 0b100,
                     0.256: 0b101
                 })),
-                BitField('mode',                0b0000000100000000, adapter=LookupAdaptoer({
+                BitField('mode',                0b0000000100000000, adapter=LookupAdapter({
                     'continuous': 0,
                     'single': 1
                 })),
@@ -78,7 +78,7 @@ class ADS1015:
             )),
             Register('THRESHOLD', 0x02, fields=(
                 BitField('low', 0xFFFF, adapter=S16Adapter),
-                BitField('high', 0xFFFF, adapter=U16Adapter)
+                BitField('high', 0xFFFF, adapter=S16Adapter)
             ))
         ))
 
