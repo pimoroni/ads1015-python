@@ -222,7 +222,6 @@ class ADS1015:
     def wait_for_conversion(self, timeout=10):
         """Wait for ADC conversion to finish."""
         t_start = time.time()
-        self.start_conversion()
         timeout = False
         while not self.conversion_ready():
             time.sleep(0.001)
