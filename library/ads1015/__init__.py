@@ -1,5 +1,6 @@
 from i2cdevice import Device, Register, BitField, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
+import time
 import struct
 
 I2C_ADDRESS_DEFAULT = 0x48
@@ -15,12 +16,14 @@ class S16Adapter(Adapter):
         return (ord(v[0]) << 8) | ord(v[1])
 
 
-class ConvAdapter(S16Adapter):
+class ConvAdapter(Adapter):
     def _decode(self, value):
-        return S16Adapter._decode(self, value >> 4)
+        if value & 0x800:
+            value -= 1 << 12
+        return value
 
     def _encode(self, value):
-        return (S16Adapter._encode(self, value) << 4) & 0xFFFF
+        return 0
 
 
 class ADS1015:
@@ -35,7 +38,7 @@ class ADS1015:
                     'active': 0,
                     'inactive_start': 1
                 })),
-                BitField('multiplexer',         0b0111000000000000, adapter=LookupAdapter({
+                BitField('multiplexer', 0b0111000000000000, adapter=LookupAdapter({
                     'in0/in1': 0b000,   # Differential reading between in0 and in0, voltages must not be negative and must not exceed supply voltage
                     'in0/ref': 0b001,   # Differential reading between in0 and onboard reference connected to in3
                     'in1/ref': 0b010,   # Differential reading between in1 and ref
@@ -45,7 +48,7 @@ class ADS1015:
                     'in2/gnd': 0b110,   # Single-ended reading between in2 and GND
                     'ref/gnd': 0b111    # Should always read 1.25v (or reference voltage)
                 })),
-                BitField('programmable_gain',   0b0000111000000000, adapter=LookupAdapter({
+                BitField('programmable_gain', 0b0000111000000000, adapter=LookupAdapter({
                     6.144: 0b000,
                     4.096: 0b001,
                     2.048: 0b010,
@@ -53,11 +56,11 @@ class ADS1015:
                     0.512: 0b100,
                     0.256: 0b101
                 })),
-                BitField('mode',                0b0000000100000000, adapter=LookupAdapter({
+                BitField('mode', 0b0000000100000000, adapter=LookupAdapter({
                     'continuous': 0,
                     'single': 1
                 })),
-                BitField('data_rate_sps',       0b0000000001110000, adapter=LookupAdapter({
+                BitField('data_rate_sps', 0b0000000001110000, adapter=LookupAdapter({
                     128: 0b000,
                     250: 0b001,
                     490: 0b010,
@@ -66,7 +69,7 @@ class ADS1015:
                     2400: 0b101,
                     3300: 0b110
                 })),
-                BitField('comparator_mode',     0b0000000000010000, adapter=LookupAdapter({
+                BitField('comparator_mode', 0b0000000000010000, adapter=LookupAdapter({
                     'traditional': 0b0,  # Traditional comparator with hystersis
                     'window': 0b01
                 })),
@@ -74,8 +77,8 @@ class ADS1015:
                     'active_low': 0b0,
                     'active_high': 0b1
                 })),
-                BitField('comparator_latching',    0b0000000000000100),
-                BitField('comparator_queue',    0b0000000000000011, adapter=LookupAdapter({
+                BitField('comparator_latching', 0b0000000000000100),
+                BitField('comparator_queue', 0b0000000000000011, adapter=LookupAdapter({
                     'one': 0b00,
                     'two': 0b01,
                     'four': 0b10,
@@ -91,15 +94,20 @@ class ADS1015:
             ), bit_width=32)
         ))
 
+    def start_conversion(self):
+        """Start a conversion."""
+        self.set_status('inactive_start')
+
+    def conversion_ready(self):
+        """Check if conversion is ready."""
+        return self.get_status() != 'active'
+
     def set_status(self, value):
         """Set the operational status.
 
         :param value: Set to true to trigger a conversion, false will have no effect.
 
         """
-        if value is True:
-            value = 'active'
-
         self._ads1015.CONFIG.set_operational_status(value)
 
     def get_status(self):
@@ -108,7 +116,7 @@ class ADS1015:
         Result will be true if the ADC is actively performing a conversion and false if it has completed.
 
         """
-        self._ads1015.CONFIG.get_operational_status() == 'active'
+        return self._ads1015.CONFIG.get_operational_status()
 
     def set_multiplexer(self, value):
         """Set the analog multiplexer.
@@ -210,6 +218,43 @@ class ADS1015:
 
     def get_comparator_queue(self):
         return self._ads1015.CONFIG.get_comparator_queue()
+
+    def wait_for_conversion(self, timeout=10):
+        """Wait for ADC conversion to finish."""
+        t_start = time.time()
+        self.start_conversion()
+        timeout = False
+        while not self.conversion_ready():
+            time.sleep(0.001)
+            if (time.time() - t_start) > timeout:
+                raise TimeoutError("Timed out waiting for conversion.")
+
+    def get_reference_voltage(self):
+        """Read the reference voltage."""
+        return self.get_voltage(channel='ref/gnd')
+
+    def get_voltage(self, channel=None):
+        """Read the raw voltage of a channel."""
+        if channel is not None:
+            self.set_multiplexer(channel)
+
+        self.start_conversion()
+        self.wait_for_conversion()
+
+        value = self.get_conversion_value()
+        gain = self.get_programmable_gain()
+        gain *= 1000.0         # Convert gain from V to mV
+        value /= 2048.0        # Divide by total register size
+        value *= float(gain)   # Multiply by current gain value to get mV
+        value /= 1000.0        # mV to V
+        return value
+
+    def get_compensated_voltage(self, channel=None, vdiv_a=8060000, vdiv_b=402000, reference_voltage=1.241):
+        """Read and compensate the voltage of a channel."""
+        pin_v = self.get_voltage(channel=channel)
+        input_v = pin_v * (float(vdiv_a + vdiv_b) / float(vdiv_b))
+        input_v += reference_voltage
+        return round(input_v, 3)
 
     def get_conversion_value(self):
         return self._ads1015.CONV.get_value()

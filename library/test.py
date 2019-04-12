@@ -1,18 +1,25 @@
 import time
 from ads1015 import ADS1015
 
+import smbus
+
+bus = smbus.SMBus(1)
 
 ads1015 = ADS1015()
-ads1015.set_multiplexer('in0/ref')
 ads1015.set_mode('single')
 ads1015.set_programmable_gain(2.048)
+ads1015.set_sample_rate(1600)
+
+channels = ['in0/ref', 'in1/ref', 'in2/ref']
+
+reference = ads1015.get_reference_voltage()
+
+print("Reference voltage: {}".format(reference))
 
 while True:
-    ads1015.set_status('active')
-    while ads1015.get_status():
-        time.sleep(0.001)
+    for channel in channels:
+        value = ads1015.get_compensated_voltage(channel=channel, reference_voltage=reference)
+        print("{}: {}".format(channel, value))
 
-    # value = ads1015._ads1015.CONV.get_value()
-    value = ads1015.get_conversion_value()
-    print(value)
+    print("")
     time.sleep(0.5)
