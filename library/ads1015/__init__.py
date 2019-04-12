@@ -1,9 +1,10 @@
-from i2cdevice import Device, Register, BitField
+from i2cdevice import Device, Register, BitField, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
 import struct
 
 I2C_ADDRESS_DEFAULT = 0x48
 I2C_ADDRESS_ALTERNATE = 0x49
+
 
 class S16Adapter(Adapter):
     def _decode(self, value):
@@ -12,6 +13,14 @@ class S16Adapter(Adapter):
     def _encode(self, value):
         v = struct.pack('>h', value)
         return (ord(v[0]) << 8) | ord(v[1])
+
+
+class ConvAdapter(S16Adapter):
+    def _decode(self, value):
+        return S16Adapter._decode(self, value >> 4)
+
+    def _encode(self, value):
+        return (S16Adapter._encode(self, value) << 4) & 0xFFFF
 
 
 class ADS1015:
@@ -74,12 +83,12 @@ class ADS1015:
                 }))
             ), bit_width=16),
             Register('CONV', 0x00, fields=(
-                BitField('value', 0xFFF0),
-            )),
+                BitField('value', 0xFFF0, adapter=ConvAdapter()),
+            ), bit_width=16),
             Register('THRESHOLD', 0x02, fields=(
-                BitField('low', 0xFFFF, adapter=S16Adapter),
-                BitField('high', 0xFFFF, adapter=S16Adapter)
-            ))
+                BitField('low', 0xFFFF, adapter=S16Adapter()),
+                BitField('high', 0xFFFF, adapter=S16Adapter())
+            ), bit_width=32)
         ))
 
     def set_status(self, value):
@@ -88,15 +97,18 @@ class ADS1015:
         :param value: Set to true to trigger a conversion, false will have no effect.
 
         """
+        if value is True:
+            value = 'active'
+
         self._ads1015.CONFIG.set_operational_status(value)
 
-    def get_status(self, value):
+    def get_status(self):
         """Get the operational status.
 
         Result will be true if the ADC is actively performing a conversion and false if it has completed.
-        
+
         """
-        self._ads1015.CONFIG.get_operational_status()
+        self._ads1015.CONFIG.get_operational_status() == 'active'
 
     def set_multiplexer(self, value):
         """Set the analog multiplexer.
