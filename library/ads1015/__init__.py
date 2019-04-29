@@ -7,6 +7,12 @@ I2C_ADDRESS_DEFAULT = 0x48
 I2C_ADDRESS_ALTERNATE = 0x49
 
 
+try:
+    TimeoutError
+except NameError:
+    from socket import timeout as TimeoutError
+
+
 class S16Adapter(Adapter):
     def _decode(self, value):
         return struct.unpack('>h', _int_to_bytes(value, 2))[0]
@@ -220,7 +226,14 @@ class ADS1015:
         return self._ads1015.CONFIG.get_comparator_queue()
 
     def wait_for_conversion(self, timeout=10):
-        """Wait for ADC conversion to finish."""
+        """Wait for ADC conversion to finish.
+
+        :param timeout: conversion timeout in seconds
+
+        :raises TimeoutError in Python 3.x
+        :raises socket.timeout in Python 2.x
+
+        """
         t_start = time.time()
         timeout = False
         while not self.conversion_ready():
