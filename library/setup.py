@@ -39,7 +39,7 @@ classifiers = ['Development Status :: 4 - Beta',
 
 setup(
     name='ads1015',
-    version='0.0.1',
+    version='0.0.2',
     author='Philip Howard',
     author_email='phil@pimoroni.com',
     description="""Python library for the ADS1015 4-channel ADC""",
