@@ -24,7 +24,7 @@ def test_timeout():
     sys.modules['smbus'].SMBus = MockSMBus
     import ads1015
     device = ads1015.ADS1015()
-    with pytest.raises(ads1015.TimeoutError):
+    with pytest.raises(ads1015.ADS1015TimeoutError):
         device.wait_for_conversion(timeout=0.01)
 
 

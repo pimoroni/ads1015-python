@@ -1,6 +1,5 @@
 from i2cdevice import Device, Register, BitField, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
-from socket import timeout as TimeoutError
 import time
 import struct
 
@@ -8,6 +7,12 @@ I2C_ADDRESS_DEFAULT = 0x48
 I2C_ADDRESS_ALTERNATE = 0x49
 
 __version__ = '0.0.3'
+
+
+try:
+    ADS1015TimeoutError = TimeoutError
+except NameError:
+    from socket import timeout as ADS1015TimeoutError
 
 
 class S16Adapter(Adapter):
@@ -225,6 +230,8 @@ class ADS1015:
     def wait_for_conversion(self, timeout=10):
         """Wait for ADC conversion to finish.
 
+        Timeout exception is alised as ads1015.ADS1015TimeoutError for convinience.
+
         :param timeout: conversion timeout in seconds
 
         :raises TimeoutError in Python 3.x
@@ -235,7 +242,7 @@ class ADS1015:
         while not self.conversion_ready():
             time.sleep(0.001)
             if (time.time() - t_start) > timeout:
-                raise TimeoutError("Timed out waiting for conversion.")
+                raise ADS1015TimeoutError("Timed out waiting for conversion.")
 
     def get_reference_voltage(self):
         """Read the reference voltage."""
