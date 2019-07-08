@@ -236,7 +236,6 @@ class ADS1015:
 
         """
         t_start = time.time()
-        timeout = False
         while not self.conversion_ready():
             time.sleep(0.001)
             if (time.time() - t_start) > timeout:
