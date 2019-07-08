@@ -1,17 +1,13 @@
 from i2cdevice import Device, Register, BitField, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
+from socket import timeout as TimeoutError
 import time
 import struct
 
 I2C_ADDRESS_DEFAULT = 0x48
 I2C_ADDRESS_ALTERNATE = 0x49
 
-__version__ = '0.0.2'
-
-try:
-    TimeoutError
-except NameError:
-    from socket import timeout as TimeoutError
+__version__ = '0.0.3'
 
 
 class S16Adapter(Adapter):
