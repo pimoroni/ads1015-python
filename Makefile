@@ -42,7 +42,7 @@ python-license: library/LICENSE.txt
 
 library/README.md: README.md library/CHANGELOG.txt
 	cp README.md library/README.md
-	printf "\n# Changelog\n" >> library/README.md
+	printf "\n# Changelog\n\n" >> library/README.md
 	cat library/CHANGELOG.txt >> library/README.md
 
 library/LICENSE.txt: LICENSE
