@@ -1,3 +1,9 @@
+0.0.3
+-----
+
+* Fixed timeout in wait_for_conversion
+* Aliased timeout exception to ads1015.ADS1015TimeoutError
+
 0.0.2
 -----
 
