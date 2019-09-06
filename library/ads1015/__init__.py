@@ -116,7 +116,7 @@ class ADS1015:
         :param value: Set to true to trigger a conversion, false will have no effect.
 
         """
-        self._ads1015.CONFIG.set_operational_status(value)
+        self._ads1015.set('CONFIG', operational_status=value)
 
     def get_status(self):
         """Get the operational status.
@@ -124,7 +124,7 @@ class ADS1015:
         Result will be true if the ADC is actively performing a conversion and false if it has completed.
 
         """
-        return self._ads1015.CONFIG.get_operational_status()
+        return self._ads1015.get('CONFIG').operational_status
 
     def set_multiplexer(self, value):
         """Set the analog multiplexer.
@@ -149,11 +149,11 @@ class ADS1015:
         :param value: Takes the form a/b
 
         """
-        self._ads1015.CONFIG.set_multiplexer(value)
+        self._ads1015.set('CONFIG', multiplexer=value)
 
     def get_multiplexer(self):
         """Return the current analog multiplexer state."""
-        self._ads1015.CONFIG.get_multiplexer()
+        self._ads1015.get('CONFIG').multiplexer
 
     def set_mode(self, value):
         """Set the analog mode.
@@ -163,11 +163,11 @@ class ADS1015:
         :param value: One of 'continuous' or 'single'
 
         """
-        self._ads1015.CONFIG.set_mode(value)
+        self._ads1015.set('CONFIG', mode=value)
 
     def get_mode(self):
         """Get the analog mode."""
-        return self._ads1015.CONFIG.get_mode()
+        return self._ads1015.get('CONFIG').mode
 
     def set_programmable_gain(self, value=2.048):
         """Set the analog gain.
@@ -181,11 +181,11 @@ class ADS1015:
         :param value: the range in volts - one of 6.144, 4.096, 2.048 (default), 1.024 or 0.256
 
         """
-        self._ads1015.CONFIG.set_programmable_gain(value)
+        self._ads1015.set('CONFIG', programmable_gain=value)
 
     def get_programmable_gain(self):
         """Return the curren gain setting."""
-        return self._ads1015.CONFIG.get_programmable_gain()
+        return self._ads1015.get('CONFIG').programmable_gain
 
     def set_sample_rate(self, value=1600):
         """Set the analog sample rate.
@@ -193,11 +193,11 @@ class ADS1015:
         :param value: The sample rate in samples-per-second - one of 128, 250, 490, 920, 1600 (default), 2400 or 3300
 
         """
-        self._ads1015.CONFIG.set_data_rate_sps(value)
+        self._ads1015.set('CONFIG', data_rate_sps=value)
 
     def get_sample_rate(self):
         """Return the current sample-rate setting."""
-        self._ads1015.CONFIG.get_data_rate_sps()
+        self._ads1015.get('CONFIG').data_rate_sps
 
     def set_comparator_mode(self, value):
         """Set the analog comparator mode.
@@ -209,23 +209,23 @@ class ADS1015:
         :param value: Either 'traditional' or 'window'
 
         """
-        self._ads1015.CONFIG.set_comparator_mode(value)
+        self._ads1015.set('CONFIG', comparator_mode=value)
 
     def get_comparator_mode(self):
         """Return the current comparator mode."""
-        self._ads1015.CONFIG.get_comparator_mode()
+        self._ads1015.get('CONFIG').comparator_mode
 
     def set_comparator_latching(self, value):
-        self._ads1015.CONFIG.set_comparator_latching(value)
+        self._ads1015.set('CONFIG', comparator_latching=value)
 
     def get_comparator_latching(self):
-        self._ads1015.CONFIG.get_comparator_latching()
+        self._ads1015.get('CONFIG').comparator_latching
 
     def set_comparator_queue(self, value):
-        self._ads1015.CONFIG.set_comparator_queue(value)
+        self._ads1015.set('CONFIG', comparator_queue=value)
 
     def get_comparator_queue(self):
-        return self._ads1015.CONFIG.get_comparator_queue()
+        return self._ads1015.get('CONFIG').comparator_queue
 
     def wait_for_conversion(self, timeout=10):
         """Wait for ADC conversion to finish.
@@ -272,16 +272,16 @@ class ADS1015:
         return round(input_v, 3)
 
     def get_conversion_value(self):
-        return self._ads1015.CONV.get_value()
+        return self._ads1015.get('CONV').value
 
     def set_low_threshold(self, value):
-        self._ads1015.THRESHOLD.set_low(value)
+        self._ads1015.set('THRESHOLD', low=value)
 
     def get_low_threshold(self):
-        self._ads1015.THRESHOLD.get_low()
+        self._ads1015.get('THRESHOLD').low
 
     def set_high_threshold(self, value):
-        self._ads1015.THRESHOLD.set_high(value)
+        self._ads1015.set('THRESHOLD', high=value)
 
     def get_high_threshold(self):
-        self._ads1015.THRESHOLD.get_high()
+        self._ads1015.get('THRESHOLD').high
