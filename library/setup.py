@@ -32,5 +32,5 @@ if parse_version(__version__) < minimum_version:
 
 setup(
     packages=['ads1015'],
-    install_requires=['i2cdevice>=0.0.4', 'setuptools>={}'.format(minimum_version)]
+    install_requires=['i2cdevice>=0.0.6', 'setuptools>={}'.format(minimum_version)]
 )
