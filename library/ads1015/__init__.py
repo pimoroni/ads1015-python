@@ -47,7 +47,7 @@ class ADS1015:
                     'inactive_start': 1
                 })),
                 BitField('multiplexer', 0b0111000000000000, adapter=LookupAdapter({
-                    'in0/in1': 0b000,   # Differential reading between in0 and in0, voltages must not be negative and must not exceed supply voltage
+                    'in0/in1': 0b000,   # Differential reading between in0 and in1, voltages must not be negative and must not exceed supply voltage
                     'in0/ref': 0b001,   # Differential reading between in0 and onboard reference connected to in3
                     'in1/ref': 0b010,   # Differential reading between in1 and ref
                     'in2/ref': 0b011,   # Differential reading between in2 and ref
