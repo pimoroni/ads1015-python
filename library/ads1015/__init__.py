@@ -101,6 +101,7 @@ class ADS1015:
                 BitField('high', 0xFFFF, adapter=S16Adapter())
             ), bit_width=32)
         ))
+        self._ads1015.select_address(self._i2c_addr)
 
     def start_conversion(self):
         """Start a conversion."""

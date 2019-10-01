@@ -19,6 +19,14 @@ def test_setup():
     del device
 
 
+def test_setup_invalid_i2c_address():
+    sys.modules['smbus'] = mock.Mock()
+    import ads1015
+    with pytest.raises(ValueError):
+        device = ads1015.ADS1015(i2c_addr=0xfff)
+        del device
+
+
 def test_timeout():
     sys.modules['smbus'] = mock.Mock()
     sys.modules['smbus'].SMBus = MockSMBus
