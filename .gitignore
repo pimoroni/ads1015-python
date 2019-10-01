@@ -19,3 +19,4 @@ library/debian/
 .coverage
 .pytest_cache
 .tox
+.vscode
