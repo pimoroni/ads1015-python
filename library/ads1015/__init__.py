@@ -175,11 +175,11 @@ class ADS1015:
 
         Sets up the full-scale range and resolution of the ADC in volts.
 
-        The range is always differential, so a value of 6.144v would give a range of +=6.144.
+        The range is always differential, so a value of 6.144v would give a range of +-6.144.
 
         A single-ended reading will therefore always have only 11-bits of resolution, since the 12th bit is the (unused) sign bit.
 
-        :param value: the range in volts - one of 6.144, 4.096, 2.048 (default), 1.024 or 0.256
+        :param value: the range in volts - one of 6.144, 4.096, 2.048 (default), 1.024, 0.512 or 0.256
 
         """
         self._ads1015.set('CONFIG', programmable_gain=value)
