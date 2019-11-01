@@ -6,7 +6,7 @@ import struct
 I2C_ADDRESS_DEFAULT = 0x48
 I2C_ADDRESS_ALTERNATE = 0x49
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 
 try:

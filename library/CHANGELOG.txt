@@ -1,3 +1,9 @@
+0.0.5
+-----
+
+* Fix to support alternate i2c address
+* Typo fixes in DocString and comment
+
 0.0.4
 -----
 
