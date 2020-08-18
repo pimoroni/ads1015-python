@@ -20,6 +20,13 @@ Latest/development library from GitHub:
 
 # Changelog
 
+0.0.6
+-----
+
+* Added support for all addresses ads1015 supports
+* genericized implementation away from pimoroni breakout
+* Typo fixes in docstring
+
 0.0.5
 -----
 
