@@ -39,7 +39,7 @@ class ConvAdapter(Adapter):
 
 
 class ADS1015:
-    def __init__(self, i2c_addr=I2C_ADDRESS_DEFAULT, alert_pin=None, i2c_dev=None):
+    def __init__(self, i2c_addr=I2C_ADDRESS_PIMORONI_DEFAULT, alert_pin=None, i2c_dev=None):
         self._is_setup = False
         self._i2c_addr = i2c_addr
         self._i2c_dev = i2c_dev
