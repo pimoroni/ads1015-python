@@ -40,4 +40,3 @@ def mocksmbus():
     sys.modules['smbus'] = mock.Mock()
     yield sys.modules['smbus']
     del sys.modules['smbus']
-

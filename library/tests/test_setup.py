@@ -33,6 +33,3 @@ def test_deprecated_inputs(ads1015, smbus_notimeout):
 
     device.set_multiplexer('ref/gnd')
     assert device.get_multiplexer() == 'in3/gnd'
-
-
-
