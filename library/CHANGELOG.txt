@@ -1,3 +1,11 @@
+0.0.6
+-----
+
+* Added support for all addresses ads1015 supports
+* Genericized implementation away from pimoroni breakout
+* Typo fixes in docstring
+* Fix get_multiplexer so that it returns a value
+
 0.0.5
 -----
 

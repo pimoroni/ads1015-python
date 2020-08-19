@@ -3,10 +3,23 @@ from i2cdevice.adapter import Adapter, LookupAdapter
 import time
 import struct
 
-I2C_ADDRESS_DEFAULT = 0x48
-I2C_ADDRESS_ALTERNATE = 0x49
+__version__ = '0.0.6'
 
-__version__ = '0.0.5'
+I2C_ADDRESS_PIMORONI_DEFAULT = 0x48
+I2C_ADDRESS_PIMORONI_ALTERNATE = 0x49
+I2C_ADDRESS_ADDR_GND = 0x48  # Address when ADDR pin is connected to Ground
+I2C_ADDRESS_ADDR_VDD = 0x49  # Address when ADDR pin is connected to VDD
+I2C_ADDRESS_ADDR_SDA = 0x50  # Address when ADDR pin is connected to SDA. Device datasheet recommends using this address last (sec 8.5.1.1)
+I2C_ADDRESS_ADDR_SCL = 0x51  # Address when ADDR pin is connected to SCL
+
+I2C_ADDRESSES = [
+    I2C_ADDRESS_PIMORONI_DEFAULT,
+    I2C_ADDRESS_PIMORONI_ALTERNATE,
+    I2C_ADDRESS_ADDR_GND,
+    I2C_ADDRESS_ADDR_VDD,
+    I2C_ADDRESS_ADDR_SDA,
+    I2C_ADDRESS_ADDR_SCL
+]
 
 
 try:
@@ -35,12 +48,18 @@ class ConvAdapter(Adapter):
 
 
 class ADS1015:
-    def __init__(self, i2c_addr=I2C_ADDRESS_DEFAULT, alert_pin=None, i2c_dev=None):
+    def __init__(self, i2c_addr=I2C_ADDRESS_PIMORONI_DEFAULT, alert_pin=None, i2c_dev=None):
         self._is_setup = False
         self._i2c_addr = i2c_addr
         self._i2c_dev = i2c_dev
         self._alert_pin = alert_pin
-        self._ads1015 = Device([I2C_ADDRESS_DEFAULT, I2C_ADDRESS_ALTERNATE], i2c_dev=self._i2c_dev, bit_width=8, registers=(
+        self._deprecated_channels = {
+            'in0/ref': 'in0/in3',
+            'in1/ref': 'in1/in3',
+            'in2/ref': 'in2/in3',
+            'ref/gnd': 'in3/gnd'
+        }
+        self._ads1015 = Device(I2C_ADDRESSES, i2c_dev=self._i2c_dev, bit_width=8, registers=(
             Register('CONFIG', 0x01, fields=(
                 BitField('operational_status', 0b1000000000000000, adapter=LookupAdapter({
                     'active': 0,
@@ -48,13 +67,13 @@ class ADS1015:
                 })),
                 BitField('multiplexer', 0b0111000000000000, adapter=LookupAdapter({
                     'in0/in1': 0b000,   # Differential reading between in0 and in1, voltages must not be negative and must not exceed supply voltage
-                    'in0/ref': 0b001,   # Differential reading between in0 and onboard reference connected to in3
-                    'in1/ref': 0b010,   # Differential reading between in1 and ref
-                    'in2/ref': 0b011,   # Differential reading between in2 and ref
+                    'in0/in3': 0b001,   # Differential reading between in0 and in3. pimoroni breakout onboard reference connected to in3
+                    'in1/in3': 0b010,   # Differential reading between in1 and in3. pimoroni breakout onboard reference connected to in3
+                    'in2/in3': 0b011,   # Differential reading between in2 and in3. pimoroni breakout onboard reference connected to in3
                     'in0/gnd': 0b100,   # Single-ended reading between in0 and GND
                     'in1/gnd': 0b101,   # Single-ended reading between in1 and GND
                     'in2/gnd': 0b110,   # Single-ended reading between in2 and GND
-                    'ref/gnd': 0b111    # Should always read 1.25v (or reference voltage)
+                    'in3/gnd': 0b111    # Single-ended reading between in3 and GND. Should always read 1.25v (or reference voltage) on pimoroni breakout
                 })),
                 BitField('programmable_gain', 0b0000111000000000, adapter=LookupAdapter({
                     6.144: 0b000,
@@ -136,25 +155,29 @@ class ADS1015:
 
         If b is specified as in1 or ref the ADC will be in differential mode.
 
-        a should be one of in0, in1 or in2
+        a should be one of in0, in1, in2, or in3
 
-        'in0/in1' - Differential reading between in0 and in0, voltages must not be negative and must not exceed supply voltage
-        'in0/ref' - Differential reading between in0 and onboard 1.24v reference connected to in3
-        'in1/ref' - Differential reading between in1 and onboard 1.24v reference connected to in3
-        'in2/ref' - Differential reading between in2 and ref
+        This method has no function on the ADS1013 or ADS1014
+
+        'in0/in1' - Differential reading between in0 and in1, voltages must not be negative and must not exceed supply voltage
+        'in0/in3' - Differential reading between in0 and in3
+        'in1/in3' - Differential reading between in1 and in3
+        'in2/in3' - Differential reading between in2 and in3
         'in0/gnd' - Single-ended reading between in0 and GND
         'in1/gnd' - Single-ended reading between in1 and GND
         'in2/gnd' - Single-ended reading between in2 and GND
-        'ref/gnd' - Should always read 1.25v (or reference voltage)
+        'in3/gnd' - Should always read 1.25v (or reference voltage)
 
         :param value: Takes the form a/b
 
         """
+        if value in self._deprecated_channels.keys():
+            value = self._deprecated_channels[value]
         self._ads1015.set('CONFIG', multiplexer=value)
 
     def get_multiplexer(self):
         """Return the current analog multiplexer state."""
-        self._ads1015.get('CONFIG').multiplexer
+        return self._ads1015.get('CONFIG').multiplexer
 
     def set_mode(self, value):
         """Set the analog mode.
@@ -171,7 +194,7 @@ class ADS1015:
         return self._ads1015.get('CONFIG').mode
 
     def set_programmable_gain(self, value=2.048):
-        """Set the analog gain.
+        """Set the analog gain. This has no function on the ADS1013.
 
         Sets up the full-scale range and resolution of the ADC in volts.
 
@@ -246,8 +269,8 @@ class ADS1015:
                 raise ADS1015TimeoutError("Timed out waiting for conversion.")
 
     def get_reference_voltage(self):
-        """Read the reference voltage."""
-        return self.get_voltage(channel='ref/gnd')
+        """Read the reference voltage that is included on the pimoroni PM422 breakout."""
+        return self.get_voltage(channel='in3/gnd')
 
     def get_voltage(self, channel=None):
         """Read the raw voltage of a channel."""
