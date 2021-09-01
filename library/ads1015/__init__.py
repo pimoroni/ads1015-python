@@ -5,6 +5,9 @@ import struct
 
 __version__ = '0.0.6'
 
+DEVICE_ADS1015 = 'ADS1015'
+DEVICE_ADS1115 = 'ADS1115'
+
 I2C_ADDRESS_DEFAULT = 0x48  # Default i2c address for Pimoroni breakout
 I2C_ADDRESS_ALTERNATE = 0x49  # Default alternate i2c address for Pimoroni breakout
 I2C_ADDRESS_ADDR_GND = 0x48  # Address when ADDR pin is connected to Ground
@@ -47,6 +50,16 @@ class ConvAdapter(Adapter):
         return 0
 
 
+class Conv16Adapter(Adapter):
+    def _decode(self, value):
+        if value & 0x8000:
+            value -= 1 << 16
+        return value
+
+    def _encode(self, value):
+        return 0
+
+
 class ADS1015:
     def __init__(self, i2c_addr=I2C_ADDRESS_DEFAULT, alert_pin=None, i2c_dev=None):
         self._is_setup = False
@@ -59,6 +72,26 @@ class ADS1015:
             'in2/ref': 'in2/in3',
             'ref/gnd': 'in3/gnd'
         }
+        self._is_ads1115 = False
+
+        self._ads1115 = Device(I2C_ADDRESSES, i2c_dev=self._i2c_dev, bit_width=8, registers=(
+            Register('CONFIG', 0x01, fields=(
+                BitField('data_rate_sps', 0b0000000011100000, adapter=LookupAdapter({
+                    8: 0b000,
+                    16: 0b001,
+                    32: 0b010,
+                    64: 0b011,
+                    128: 0b100,
+                    475: 0b101,
+                    860: 0b110
+                })),
+            )),
+            Register('CONV', 0x00, fields=(
+                BitField('value', 0xFFFF, adapter=Conv16Adapter()),
+            ), bit_width=16),
+        ))
+        self._ads1115.select_address(self._i2c_addr)
+
         self._ads1015 = Device(I2C_ADDRESSES, i2c_dev=self._i2c_dev, bit_width=8, registers=(
             Register('CONFIG', 0x01, fields=(
                 BitField('operational_status', 0b1000000000000000, adapter=LookupAdapter({
@@ -121,6 +154,32 @@ class ADS1015:
             ), bit_width=32)
         ))
         self._ads1015.select_address(self._i2c_addr)
+
+    def detect_chip_type(self, timeout=10.0):
+        """Attempt to auto-detect if an ADS1015 or ADS1115 is connected."""
+        # 250sps is 16sps on ADS1115
+        sps = 128
+        samples = 10
+        self._ads1015.set('CONFIG', mode='single')
+        self._ads1115.set('CONFIG', data_rate_sps=sps)
+        runtimes = []
+        for x in range(samples):
+            self.start_conversion()
+            t_start = time.time()
+
+            while self._ads1015.get('CONFIG').operational_status == 'active':
+                if (time.time() - t_start) > timeout:
+                    raise ADS1015TimeoutError("Timed out waiting for conversion.")
+                time.sleep(0.001)
+
+            runtimes.append(time.time() - t_start)
+            time.sleep(0.001)
+
+        runtime = sum(runtimes) / float(samples)
+        # If it takes roughly the same time or longer per sample,
+        # then it's an ADS1115. An ADS1015 would be roughly 16x faster.
+        self._is_ads1115 = runtime >= (1.0 / sps)
+        return [DEVICE_ADS1015, DEVICE_ADS1115][self._is_ads1115]
 
     def start_conversion(self):
         """Start a conversion."""
@@ -214,10 +273,16 @@ class ADS1015:
     def set_sample_rate(self, value=1600):
         """Set the analog sample rate.
 
-        :param value: The sample rate in samples-per-second - one of 128, 250, 490, 920, 1600 (default), 2400 or 3300
+        :param value: The sample rate in samples-per-second
+
+        Valid values for ADS1015 are 128, 250, 490, 920, 1600 (default), 2400 or 3300
+        Valid values for ADS1115 are 8, 16, 32, 64, 128 (default), 250, 475, 860
 
         """
-        self._ads1015.set('CONFIG', data_rate_sps=value)
+        if self._is_ads1115:
+            self._ads1115.set('CONFIG', data_rate_sps=value)
+        else:
+            self._ads1015.set('CONFIG', data_rate_sps=value)
 
     def get_sample_rate(self):
         """Return the current sample-rate setting."""
@@ -283,7 +348,10 @@ class ADS1015:
         value = self.get_conversion_value()
         gain = self.get_programmable_gain()
         gain *= 1000.0         # Convert gain from V to mV
-        value /= 2048.0        # Divide by total register size
+        if self._is_ads1115:
+            value /= 32768.0   # Divide by total register size
+        else:
+            value /= 2048.0
         value *= float(gain)   # Multiply by current gain value to get mV
         value /= 1000.0        # mV to V
         return value
@@ -296,7 +364,10 @@ class ADS1015:
         return round(input_v, 3)
 
     def get_conversion_value(self):
-        return self._ads1015.get('CONV').value
+        if self._is_ads1115:
+            return self._ads1115.get('CONV').value
+        else:
+            return self._ads1015.get('CONV').value
 
     def set_low_threshold(self, value):
         self._ads1015.set('THRESHOLD', low=value)

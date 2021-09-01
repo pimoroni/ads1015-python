@@ -12,6 +12,11 @@ def test_setup_invalid_i2c_address(ads1015, mocksmbus):
         del device
 
 
+def test_autodetect(ads1015, smbus_notimeout):
+    device = ads1015.ADS1015()
+    assert device.detect_chip_type() == 'ADS1015'
+
+
 def test_timeout(ads1015, smbus_timeout):
     device = ads1015.ADS1015()
     with pytest.raises(ads1015.ADS1015TimeoutError):
