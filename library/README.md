@@ -20,12 +20,20 @@ Latest/development library from GitHub:
 
 # Changelog
 
+0.0.7
+-----
+
+* Fix setting data rate
+* Add support for ADS1115
+* Add new detect_chip_type function
+
 0.0.6
 -----
 
 * Added support for all addresses ads1015 supports
-* genericized implementation away from pimoroni breakout
+* Genericized implementation away from pimoroni breakout
 * Typo fixes in docstring
+* Fix get_multiplexer so that it returns a value
 
 0.0.5
 -----

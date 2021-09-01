@@ -1,3 +1,10 @@
+0.0.7
+-----
+
+* Fix setting data rate
+* Add support for ADS1115
+* Add new detect_chip_type function
+
 0.0.6
 -----
 

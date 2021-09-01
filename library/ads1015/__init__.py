@@ -3,7 +3,7 @@ from i2cdevice.adapter import Adapter, LookupAdapter
 import time
 import struct
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 DEVICE_ADS1015 = 'ADS1015'
 DEVICE_ADS1115 = 'ADS1115'
