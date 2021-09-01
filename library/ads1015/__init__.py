@@ -87,7 +87,7 @@ class ADS1015:
                     'continuous': 0,
                     'single': 1
                 })),
-                BitField('data_rate_sps', 0b0000000001110000, adapter=LookupAdapter({
+                BitField('data_rate_sps', 0b0000000011100000, adapter=LookupAdapter({
                     128: 0b000,
                     250: 0b001,
                     490: 0b010,
