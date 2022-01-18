@@ -2,8 +2,11 @@ from i2cdevice import Device, Register, BitField, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
 import time
 import struct
+from functools import wraps
+from threading import Lock
 
-__version__ = '0.0.7'
+
+__version__ = '0.0.8'
 
 DEVICE_ADS1015 = 'ADS1015'
 DEVICE_ADS1115 = 'ADS1115'
@@ -60,8 +63,19 @@ class Conv16Adapter(Adapter):
         return 0
 
 
+def synchronized(func):
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        with self._lock:
+            return func(self, *args, **kwargs)
+
+    return wrapper
+
+
 class ADS1015:
     def __init__(self, i2c_addr=I2C_ADDRESS_DEFAULT, alert_pin=None, i2c_dev=None):
+        self._lock = Lock()
         self._is_setup = False
         self._i2c_addr = i2c_addr
         self._i2c_dev = i2c_dev
@@ -155,6 +169,7 @@ class ADS1015:
         ))
         self._ads1015.select_address(self._i2c_addr)
 
+    @synchronized
     def detect_chip_type(self, timeout=10.0):
         """Attempt to auto-detect if an ADS1015 or ADS1115 is connected."""
         # 250sps is 16sps on ADS1115
@@ -337,6 +352,7 @@ class ADS1015:
         """Read the reference voltage that is included on the pimoroni PM422 breakout."""
         return self.get_voltage(channel='in3/gnd')
 
+    @synchronized
     def get_voltage(self, channel=None):
         """Read the raw voltage of a channel."""
         if channel is not None:
