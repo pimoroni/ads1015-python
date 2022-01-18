@@ -1,3 +1,8 @@
+0.0.8
+-----
+
+* Add thread-safe wrapper around ADC reads
+
 0.0.7
 -----
 
