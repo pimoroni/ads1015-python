@@ -9,13 +9,13 @@
 
 Stable library from PyPi:
 
-* Just run `sudo pip install ads1015`
+* Just run `python3 -m pip install ads1015`
 
 Latest/development library from GitHub:
 
 * `git clone https://github.com/pimoroni/ads1015-python`
 * `cd ads1015-python`
-* `sudo ./install.sh`
+* `sudo ./install.sh --unstable`
 
 
 # Changelog
