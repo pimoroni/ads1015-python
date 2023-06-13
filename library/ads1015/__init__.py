@@ -15,8 +15,8 @@ I2C_ADDRESS_DEFAULT = 0x48  # Default i2c address for Pimoroni breakout
 I2C_ADDRESS_ALTERNATE = 0x49  # Default alternate i2c address for Pimoroni breakout
 I2C_ADDRESS_ADDR_GND = 0x48  # Address when ADDR pin is connected to Ground
 I2C_ADDRESS_ADDR_VDD = 0x49  # Address when ADDR pin is connected to VDD
-I2C_ADDRESS_ADDR_SDA = 0x50  # Address when ADDR pin is connected to SDA. Device datasheet recommends using this address last (sec 8.5.1.1)
-I2C_ADDRESS_ADDR_SCL = 0x51  # Address when ADDR pin is connected to SCL
+I2C_ADDRESS_ADDR_SDA = 0x4A  # Address when ADDR pin is connected to SDA. Device datasheet recommends using this address last (sec 8.5.1.1)
+I2C_ADDRESS_ADDR_SCL = 0x4B  # Address when ADDR pin is connected to SCL
 
 I2C_ADDRESSES = [
     I2C_ADDRESS_DEFAULT,
