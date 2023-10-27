@@ -352,7 +352,7 @@ class ADS1015:
         self._ads1015.set("CONFIG", programmable_gain=value)
 
     def get_programmable_gain(self):
-        """Return the curren gain setting."""
+        """Return the current gain setting."""
         return self._ads1015.get("CONFIG").programmable_gain
 
     def set_sample_rate(self, value=1600):
@@ -404,7 +404,7 @@ class ADS1015:
     def wait_for_conversion(self, timeout=10):
         """Wait for ADC conversion to finish.
 
-        Timeout exception is alised as ads1015.ADS1015TimeoutError for convinience.
+        Timeout exception is aliased as ads1015.ADS1015TimeoutError for convenience.
 
         :param timeout: conversion timeout in seconds
 

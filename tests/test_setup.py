@@ -30,7 +30,7 @@ def test_convert(ads1015, smbus_notimeout):
 
 def test_deprecated_inputs(ads1015, smbus_notimeout):
     """Test that we can read the value of the multiplexer register
-    without getting a deprectaed input name back."""
+    without getting a deprecated input name back."""
     device = ads1015.ADS1015()
     for pin in ["in0/in3", "in1/in3", "in2/in3", "in3/gnd"]:
         device.set_multiplexer(pin)
