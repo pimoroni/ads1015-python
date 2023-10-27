@@ -1,4 +1,0 @@
-[run]
-source = ads1015
-omit =
-    .tox/*

@@ -6,7 +6,7 @@ from functools import wraps
 from threading import Lock
 
 
-__version__ = '0.0.8'
+__version__ = "0.0.8"
 
 DEVICE_ADS1015 = 'ADS1015'
 DEVICE_ADS1115 = 'ADS1115'
