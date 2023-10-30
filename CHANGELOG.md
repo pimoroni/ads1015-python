@@ -1,7 +1,14 @@
+1.0.0
+-----
+
+* Enhancement: Repackage to pyproject.toml/hatchling
+* Isort and black code formatting
+
 0.0.8
 -----
 
 * Add thread-safe wrapper around ADC reads
+* Minor spelling fixes
 
 0.0.7
 -----
