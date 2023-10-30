@@ -23,22 +23,22 @@ def ads1015():
 
 @pytest.fixture(scope="function")
 def smbus_notimeout():
-    sys.modules["smbus"] = mock.Mock()
-    sys.modules["smbus"].SMBus = MySMBus
+    sys.modules["smbus2"] = mock.Mock()
+    sys.modules["smbus2"].SMBus = MySMBus
     yield
-    del sys.modules["smbus"]
+    del sys.modules["smbus2"]
 
 
 @pytest.fixture(scope="function")
 def smbus_timeout():
-    sys.modules["smbus"] = mock.Mock()
-    sys.modules["smbus"].SMBus = MockSMBus
+    sys.modules["smbus2"] = mock.Mock()
+    sys.modules["smbus2"].SMBus = MockSMBus
     yield
-    del sys.modules["smbus"]
+    del sys.modules["smbus2"]
 
 
 @pytest.fixture(scope="function")
 def mocksmbus():
-    sys.modules["smbus"] = mock.Mock()
-    yield sys.modules["smbus"]
-    del sys.modules["smbus"]
+    sys.modules["smbus2"] = mock.Mock()
+    yield sys.modules["smbus2"]
+    del sys.modules["smbus2"]

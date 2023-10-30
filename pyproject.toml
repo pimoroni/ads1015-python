@@ -35,7 +35,7 @@ classifiers = [
     "Topic :: System :: Hardware",
 ]
 dependencies = [
-    "i2cdevice"
+    "i2cdevice>=1.0.0"
 ]
 
 [project.urls]
