@@ -250,14 +250,14 @@ class ADS1015:
         runtimes = []
         for x in range(samples):
             self.start_conversion()
-            t_start = time.time()
+            t_start = time.monotonic()
 
             while self._ads1015.get("CONFIG").operational_status == "active":
-                if (time.time() - t_start) > timeout:
+                if (time.monotonic() - t_start) > timeout:
                     raise ADS1015TimeoutError("Timed out waiting for conversion.")
                 time.sleep(0.001)
 
-            runtimes.append(time.time() - t_start)
+            runtimes.append(time.monotonic() - t_start)
             time.sleep(0.001)
 
         runtime = sum(runtimes) / float(samples)
@@ -412,10 +412,10 @@ class ADS1015:
         :raises socket.timeout in Python 2.x
 
         """
-        t_start = time.time()
+        t_start = time.monotonic()
         while not self.conversion_ready():
             time.sleep(0.001)
-            if (time.time() - t_start) > timeout:
+            if (time.monotonic() - t_start) > timeout:
                 raise ADS1015TimeoutError("Timed out waiting for conversion.")
 
     def get_reference_voltage(self):
