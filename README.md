@@ -16,4 +16,3 @@ Latest/development library from GitHub:
 * `git clone https://github.com/pimoroni/ads1015-python`
 * `cd ads1015-python`
 * `./install.sh --unstable`
-
