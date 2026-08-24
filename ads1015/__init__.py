@@ -1,12 +1,16 @@
 import struct
 import time
 from functools import wraps
+from importlib.metadata import PackageNotFoundError, version
 from threading import Lock
 
 from i2cdevice import BitField, Device, Register, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
 
-__version__ = "1.0.0"
+try:
+    __version__ = version("ads1015")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 
 DEVICE_ADS1015 = "ADS1015"
 DEVICE_ADS1115 = "ADS1115"
