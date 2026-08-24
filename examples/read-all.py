@@ -15,7 +15,7 @@ Press Ctrl+C to exit!
 ads1015 = ADS1015()
 chip_type = ads1015.detect_chip_type()
 
-print("Found: {}".format(chip_type))
+print(f"Found: {chip_type}")
 
 ads1015.set_mode("single")
 ads1015.set_programmable_gain(2.048)
@@ -27,7 +27,7 @@ else:
 
 reference = ads1015.get_reference_voltage()
 
-print("Reference voltage: {:6.3f}v \n".format(reference))
+print(f"Reference voltage: {reference:6.3f}v \n")
 
 try:
     while True:
@@ -35,9 +35,9 @@ try:
             value = ads1015.get_compensated_voltage(
                 channel=channel, reference_voltage=reference
             )
-            print("{}: {:6.3f}v".format(channel, value))
+            print(f"{channel}: {value:6.3f}v")
 
-        print("")
+        print()
         time.sleep(0.5)
 
 except KeyboardInterrupt:
