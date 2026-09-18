@@ -1,12 +1,16 @@
 import struct
 import time
 from functools import wraps
+from importlib.metadata import PackageNotFoundError, version
 from threading import Lock
 
 from i2cdevice import BitField, Device, Register, _int_to_bytes
 from i2cdevice.adapter import Adapter, LookupAdapter
 
-__version__ = "1.0.0"
+try:
+    __version__ = version("ads1015")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 
 DEVICE_ADS1015 = "ADS1015"
 DEVICE_ADS1115 = "ADS1115"
@@ -248,16 +252,16 @@ class ADS1015:
         self._ads1015.set("CONFIG", mode="single")
         self._ads1115.set("CONFIG", data_rate_sps=sps)
         runtimes = []
-        for x in range(samples):
+        for _ in range(samples):
             self.start_conversion()
-            t_start = time.time()
+            t_start = time.monotonic()
 
             while self._ads1015.get("CONFIG").operational_status == "active":
-                if (time.time() - t_start) > timeout:
+                if (time.monotonic() - t_start) > timeout:
                     raise ADS1015TimeoutError("Timed out waiting for conversion.")
                 time.sleep(0.001)
 
-            runtimes.append(time.time() - t_start)
+            runtimes.append(time.monotonic() - t_start)
             time.sleep(0.001)
 
         runtime = sum(runtimes) / float(samples)
@@ -315,7 +319,7 @@ class ADS1015:
         :param value: Takes the form a/b
 
         """
-        if value in self._deprecated_channels.keys():
+        if value in self._deprecated_channels:
             value = self._deprecated_channels[value]
         self._ads1015.set("CONFIG", multiplexer=value)
 
@@ -371,7 +375,7 @@ class ADS1015:
 
     def get_sample_rate(self):
         """Return the current sample-rate setting."""
-        self._ads1015.get("CONFIG").data_rate_sps
+        return self._ads1015.get("CONFIG").data_rate_sps
 
     def set_comparator_mode(self, value):
         """Set the analog comparator mode.
@@ -387,13 +391,13 @@ class ADS1015:
 
     def get_comparator_mode(self):
         """Return the current comparator mode."""
-        self._ads1015.get("CONFIG").comparator_mode
+        return self._ads1015.get("CONFIG").comparator_mode
 
     def set_comparator_latching(self, value):
         self._ads1015.set("CONFIG", comparator_latching=value)
 
     def get_comparator_latching(self):
-        self._ads1015.get("CONFIG").comparator_latching
+        return self._ads1015.get("CONFIG").comparator_latching
 
     def set_comparator_queue(self, value):
         self._ads1015.set("CONFIG", comparator_queue=value)
@@ -412,10 +416,10 @@ class ADS1015:
         :raises socket.timeout in Python 2.x
 
         """
-        t_start = time.time()
+        t_start = time.monotonic()
         while not self.conversion_ready():
             time.sleep(0.001)
-            if (time.time() - t_start) > timeout:
+            if (time.monotonic() - t_start) > timeout:
                 raise ADS1015TimeoutError("Timed out waiting for conversion.")
 
     def get_reference_voltage(self):
@@ -461,10 +465,10 @@ class ADS1015:
         self._ads1015.set("THRESHOLD", low=value)
 
     def get_low_threshold(self):
-        self._ads1015.get("THRESHOLD").low
+        return self._ads1015.get("THRESHOLD").low
 
     def set_high_threshold(self, value):
         self._ads1015.set("THRESHOLD", high=value)
 
     def get_high_threshold(self):
-        self._ads1015.get("THRESHOLD").high
+        return self._ads1015.get("THRESHOLD").high

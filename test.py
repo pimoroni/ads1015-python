@@ -15,14 +15,14 @@ channels = ["in0/ref", "in1/ref", "in2/ref"]
 
 reference = ads1015.get_reference_voltage()
 
-print("Reference voltage: {}".format(reference))
+print(f"Reference voltage: {reference}")
 
 while True:
     for channel in channels:
         value = ads1015.get_compensated_voltage(
             channel=channel, reference_voltage=reference
         )
-        print("{}: {}".format(channel, value))
+        print(f"{channel}: {value}")
 
-    print("")
+    print()
     time.sleep(0.5)
