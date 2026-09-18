@@ -1,3 +1,12 @@
+2.0.0
+-----
+
+* Enhancement: Repackage to the uv/hatchling method, with PyPI trusted publishing
+* Enhancement: Version is derived from the git tag, __version__ from package metadata
+* Bugfix: get_sample_rate, get_comparator_mode, get_comparator_latching, get_low_threshold and get_high_threshold now return their values
+* Bugfix: Use time.monotonic for conversion timeouts, so a system clock change cannot stall them
+* Python 3.9 or later, 3.7 and 3.8 support dropped
+
 1.0.0
 -----
 
